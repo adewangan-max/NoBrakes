@@ -23,7 +23,7 @@ export default function Home() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4">Loading...</p>
+          <p className="mt-4">Loading....</p>
         </div>
       </div>
     );
@@ -56,7 +56,7 @@ export default function Home() {
                 Logout
               </button>
             </div>
-            
+
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 User Information
@@ -70,7 +70,9 @@ export default function Home() {
                 </p>
                 <p className="text-gray-600 dark:text-gray-300">
                   <span className="font-medium">Last Sign In:</span>{" "}
-                  {new Date(user.last_sign_in_at || user.created_at).toLocaleString()}
+                  {new Date(
+                    user.last_sign_in_at || user.created_at,
+                  ).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -84,7 +86,7 @@ export default function Home() {
                   Your account is active and ready to use.
                 </p>
               </div>
-              
+
               <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
                   Authentication
@@ -93,7 +95,7 @@ export default function Home() {
                   Successfully authenticated with Supabase.
                 </p>
               </div>
-              
+
               <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-2">
                   Next Steps
