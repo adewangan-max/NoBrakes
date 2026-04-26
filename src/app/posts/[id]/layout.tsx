@@ -2,14 +2,15 @@ import { Metadata, ResolvingMetadata } from 'next';
 import { supabase } from '@/lib/supabase';
 
 type Props = {
-  params: { id: string }
+  params: Promise<{ id: string }>
 };
 
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const rawId = params.id as string;
+  const resolvedParams = await params;
+  const rawId = resolvedParams.id as string;
   const uuidMatch = rawId ? rawId.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/) : null;
   const id = uuidMatch ? uuidMatch[0] : null;
 
@@ -45,8 +46,9 @@ export async function generateMetadata(
   };
 }
 
-export default async function PostLayout({ children, params }: { children: React.ReactNode, params: { id: string } }) {
-  const rawId = params.id as string;
+export default async function PostLayout({ children, params }: { children: React.ReactNode, params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const rawId = resolvedParams.id as string;
   const uuidMatch = rawId ? rawId.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/) : null;
   const id = uuidMatch ? uuidMatch[0] : null;
 
